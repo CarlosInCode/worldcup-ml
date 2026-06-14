@@ -2934,14 +2934,22 @@ source = { editable = "." }
 dependencies = [
     { name = "duckdb" },
     { name = "httpx" },
+    { name = "joblib" },
+    { name = "numpy" },
     { name = "pandera", extra = ["polars"] },
+    { name = "plotly" },
     { name = "polars" },
     { name = "pyarrow" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
     { name = "rich" },
+    { name = "scikit-learn" },
+    { name = "scipy" },
+    { name = "statsmodels" },
+    { name = "streamlit" },
     { name = "tenacity" },
     { name = "typer" },
+    { name = "xgboost" },
 ]
 
 [package.optional-dependencies]
@@ -2950,27 +2958,18 @@ dev = [
     { name = "ruff" },
 ]
 ml = [
-    { name = "joblib" },
     { name = "mlflow" },
-    { name = "numpy" },
-    { name = "scikit-learn" },
-    { name = "statsmodels" },
-    { name = "xgboost" },
-]
-viz = [
-    { name = "plotly" },
-    { name = "streamlit" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "duckdb", specifier = ">=1.0" },
     { name = "httpx", specifier = ">=0.27" },
-    { name = "joblib", marker = "extra == 'ml'", specifier = ">=1.4" },
+    { name = "joblib", specifier = ">=1.4" },
     { name = "mlflow", marker = "extra == 'ml'", specifier = ">=2.14" },
-    { name = "numpy", marker = "extra == 'ml'", specifier = ">=1.26" },
+    { name = "numpy", specifier = ">=1.26" },
     { name = "pandera", extras = ["polars"], specifier = ">=0.20" },
-    { name = "plotly", marker = "extra == 'viz'", specifier = ">=5.22" },
+    { name = "plotly", specifier = ">=5.22" },
     { name = "polars", specifier = ">=1.0" },
     { name = "pyarrow", specifier = ">=16.0" },
     { name = "pydantic", specifier = ">=2.7" },
@@ -2978,14 +2977,15 @@ requires-dist = [
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.2" },
     { name = "rich", specifier = ">=13.7" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.5" },
-    { name = "scikit-learn", marker = "extra == 'ml'", specifier = ">=1.5" },
-    { name = "statsmodels", marker = "extra == 'ml'", specifier = ">=0.14" },
-    { name = "streamlit", marker = "extra == 'viz'", specifier = ">=1.36" },
+    { name = "scikit-learn", specifier = ">=1.5" },
+    { name = "scipy", specifier = ">=1.11" },
+    { name = "statsmodels", specifier = ">=0.14" },
+    { name = "streamlit", specifier = ">=1.36" },
     { name = "tenacity", specifier = ">=8.3" },
     { name = "typer", specifier = ">=0.12" },
-    { name = "xgboost", marker = "extra == 'ml'", specifier = ">=2.1" },
+    { name = "xgboost", specifier = ">=2.1" },
 ]
-provides-extras = ["ml", "viz", "dev"]
+provides-extras = ["ml", "dev"]
 
 [[package]]
 name = "xgboost"
