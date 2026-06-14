@@ -1,16 +1,17 @@
-# Dependencias de RUNTIME para el dashboard (Streamlit Cloud / Hugging Face Spaces).
-# Versiones FIJAS = los modelos serializados (.joblib/.pkl) cargan con la misma versión
-# de sklearn/xgboost/statsmodels con la que se entrenaron (evita errores de pickle).
-streamlit==1.58.0
-plotly==6.8.0
-polars==1.41.2
-duckdb==1.5.3
-pyarrow==24.0.0
-scikit-learn==1.9.0
-xgboost==3.2.0
-statsmodels==0.14.6
-joblib==1.5.3
-scipy==1.17.1
-numpy==2.4.6
-pydantic==2.13.4
-pydantic-settings==2.14.1
+# Dependencias de RUNTIME del dashboard (Streamlit Cloud / Hugging Face Spaces).
+# Rangos amplios (no versiones exactas) para que haya wheels en el Python del host
+# (Streamlit Cloud suele usar 3.11–3.13, no 3.14). La carga de modelos es tolerante a
+# fallos (ver predict.py), así que pequeñas diferencias de versión no tumban la app.
+streamlit>=1.30
+plotly>=5.18
+polars>=1.0
+duckdb>=1.0
+pyarrow>=14.0
+scikit-learn>=1.3
+xgboost>=2.0
+statsmodels>=0.14
+joblib>=1.3
+scipy>=1.11
+numpy>=1.26,<3
+pydantic>=2.5
+pydantic-settings>=2.1

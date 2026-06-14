@@ -314,77 +314,87 @@ def predict_match(home_team_id: int, away_team_id: int, referee: str | None = No
     result["mercados_goles"] = goal_markets(lh, la)
 
     if _MODEL_PATH.exists():
-        import joblib
-        import numpy as np
+        try:  # si el modelo no carga (versión incompatible), seguimos con la simulación
+            import joblib
+            import numpy as np
 
-        bundle = joblib.load(_MODEL_PATH)
-        model, feats = bundle["model"], bundle["features"]
-        fpd = (hp - ap) if (hp is not None and ap is not None) else None
-        values = {
-            "home_elo": home_elo, "away_elo": away_elo, "elo_diff": home_elo - away_elo,
-            "rest_days_home": 5, "rest_days_away": 5,
-            "home_form_pts": hp, "away_form_pts": ap, "form_pts_diff": fpd,
-            "home_gf": hgf, "home_ga": hga, "away_gf": agf, "away_ga": aga,
-            "h2h_home_ppg": h2h,
-            "is_neutral": 1 if neutral else 0,
-            "importance": 2 if neutral else 1,  # neutral suele ser torneo (importancia alta)
-            "home_sos": home_sos, "away_sos": away_sos,
-        }
-        # nan -> el imputador del entrenamiento usó la media; aquí pasamos nan y XGBoost
-        # lo maneja nativamente.
-        X = np.array([[values.get(f, np.nan) if values.get(f) is not None else np.nan for f in feats]], dtype=float)
-        p = model.predict_proba(X)[0]
-        result.update(
-            metodo="xgboost_1x2 + simulacion_poisson",
-            prob_home_win=round(float(p[0]), 3),
-            prob_draw=round(float(p[1]), 3),
-            prob_away_win=round(float(p[2]), 3),
-        )
+            bundle = joblib.load(_MODEL_PATH)
+            model, feats = bundle["model"], bundle["features"]
+            fpd = (hp - ap) if (hp is not None and ap is not None) else None
+            values = {
+                "home_elo": home_elo, "away_elo": away_elo, "elo_diff": home_elo - away_elo,
+                "rest_days_home": 5, "rest_days_away": 5,
+                "home_form_pts": hp, "away_form_pts": ap, "form_pts_diff": fpd,
+                "home_gf": hgf, "home_ga": hga, "away_gf": agf, "away_ga": aga,
+                "h2h_home_ppg": h2h,
+                "is_neutral": 1 if neutral else 0,
+                "importance": 2 if neutral else 1,
+                "home_sos": home_sos, "away_sos": away_sos,
+            }
+            X = np.array([[values.get(f) if values.get(f) is not None else np.nan
+                           for f in feats]], dtype=float)
+            p = model.predict_proba(X)[0]
+            result.update(
+                metodo="xgboost_1x2 + simulacion_poisson",
+                prob_home_win=round(float(p[0]), 3),
+                prob_draw=round(float(p[1]), 3),
+                prob_away_win=round(float(p[2]), 3),
+            )
+        except Exception:
+            pass
 
     # --- TARJETAS (si el modelo está entrenado y hay datos) ---
     if _CARDS_MODEL.exists() and home_cards is not None and away_cards is not None:
-        from statsmodels.iolib.smpickle import load_pickle
+        try:
+            from statsmodels.iolib.smpickle import load_pickle
 
-        model = load_pickle(str(_CARDS_MODEL))
-        # mismo orden que cards._FEATURES: [ref_avg_cards, home_avg_cards, away_avg_cards]
-        ref_val = ref_cards if ref_cards is not None else (home_cards + away_cards) / 2
-        lam = _glm_lambda(model, [ref_val, home_cards, away_cards])
-        cm = count_markets(lam, [2.5, 3.5, 4.5, 5.5, 6.5], max_count=10)
-        result["tarjetas"] = {
-            "esperadas": cm["esperado"],
-            "arbitro_usado": referee or "(media, sin árbitro)",
-            "mas_probable": cm["mas_probable"],
-            "over_under": cm["over_under"],
-            "distribucion": cm["distribucion"],
-        }
+            model = load_pickle(str(_CARDS_MODEL))
+            ref_val = ref_cards if ref_cards is not None else (home_cards + away_cards) / 2
+            lam = _glm_lambda(model, [ref_val, home_cards, away_cards])
+            cm = count_markets(lam, [2.5, 3.5, 4.5, 5.5, 6.5], max_count=10)
+            result["tarjetas"] = {
+                "esperadas": cm["esperado"],
+                "arbitro_usado": referee or "(media, sin árbitro)",
+                "mas_probable": cm["mas_probable"],
+                "over_under": cm["over_under"],
+                "distribucion": cm["distribucion"],
+            }
+        except Exception:
+            pass
 
     # --- CÓRNERS (si el modelo está entrenado y hay datos) ---
     if _CORNERS_MODEL.exists() and None not in (home_cf, home_ca, away_cf, away_ca):
-        from statsmodels.iolib.smpickle import load_pickle
+        try:
+            from statsmodels.iolib.smpickle import load_pickle
 
-        model = load_pickle(str(_CORNERS_MODEL))
-        # orden corners._FEATURES: corners(4) + home_shots_for + away_shots_for + elo_diff
-        hs = home_shots if home_shots is not None else 10.0
-        as_ = away_shots if away_shots is not None else 10.0
-        lam = _glm_lambda(model, [home_cf, home_ca, away_cf, away_ca, hs, as_, home_elo - away_elo])
-        cm = count_markets(lam, [7.5, 8.5, 9.5, 10.5, 11.5], max_count=16)
-        result["corners"] = {
-            "esperados": cm["esperado"],
-            "mas_probable": cm["mas_probable"],
-            "over_under": cm["over_under"],
-            "distribucion": cm["distribucion"],
-        }
+            model = load_pickle(str(_CORNERS_MODEL))
+            hs = home_shots if home_shots is not None else 10.0
+            as_ = away_shots if away_shots is not None else 10.0
+            lam = _glm_lambda(model, [home_cf, home_ca, away_cf, away_ca, hs, as_,
+                                      home_elo - away_elo])
+            cm = count_markets(lam, [7.5, 8.5, 9.5, 10.5, 11.5], max_count=16)
+            result["corners"] = {
+                "esperados": cm["esperado"],
+                "mas_probable": cm["mas_probable"],
+                "over_under": cm["over_under"],
+                "distribucion": cm["distribucion"],
+            }
+        except Exception:
+            pass
 
     # --- TIROS A PUERTA por jugador (principales rematadores de cada equipo) ---
     if _PLAYER_SHOTS_MODEL.exists():
-        from statsmodels.iolib.smpickle import load_pickle
+        try:
+            from statsmodels.iolib.smpickle import load_pickle
 
-        pmodel = load_pickle(str(_PLAYER_SHOTS_MODEL))
-        with connect() as con:
-            local = _predict_team_shots(con, pmodel, home_team_id, True)
-            visita = _predict_team_shots(con, pmodel, away_team_id, False)
-        if local or visita:
-            result["tiros_jugadores"] = {"local": local, "visitante": visita}
+            pmodel = load_pickle(str(_PLAYER_SHOTS_MODEL))
+            with connect() as con:
+                local = _predict_team_shots(con, pmodel, home_team_id, True)
+                visita = _predict_team_shots(con, pmodel, away_team_id, False)
+            if local or visita:
+                result["tiros_jugadores"] = {"local": local, "visitante": visita}
+        except Exception:
+            pass
 
     # Comparativa de equipos (el contexto detrás de la predicción).
     def _r(x):
