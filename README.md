@@ -1,3 +1,14 @@
+---
+title: World Cup ML 2026
+emoji: ⚽
+colorFrom: green
+colorTo: blue
+sdk: streamlit
+sdk_version: 1.58.0
+app_file: streamlit_app.py
+pinned: false
+---
+
 # ⚽ World Cup ML — Plataforma de datos + predicciones para el Mundial FIFA 2026
 
 Predice resultados, tarjetas, córners, over/under y stats por jugador a partir del
