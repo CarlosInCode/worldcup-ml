@@ -1,8 +1,8 @@
 .PHONY: setup demo lint test clean
 
-# Instala todo (base + ml + viz + dev) en un entorno virtual gestionado por uv.
+# Instala todo (base ya incluye ML + viz; extras = mlflow para tracking + dev).
 setup:
-	uv sync --extra ml --extra viz --extra dev
+	uv sync --extra ml --extra dev
 
 # Pipeline de demostración end-to-end (requiere .env con tu API key).
 # Ingiere varias temporadas de la Premier (league 39) para tener datos suficientes.

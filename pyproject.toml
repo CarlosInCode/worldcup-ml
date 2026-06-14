@@ -19,22 +19,24 @@ dependencies = [
     # --- CLI / UX ---
     "typer>=0.12",
     "rich>=13.7",
+    # --- ML (runtime: modelos + predicción) ---
+    # En base (no en extras) para que el hosting que instala desde pyproject (Streamlit
+    # Cloud) tenga todo lo que el dashboard necesita en runtime.
+    "scikit-learn>=1.5",
+    "xgboost>=2.1",
+    "statsmodels>=0.14",   # regresión de Poisson (goles, tarjetas, córners)
+    "numpy>=1.26",
+    "joblib>=1.4",         # serialización de modelos
+    "scipy>=1.11",         # distribuciones de Poisson (mercados)
+    # --- Visualización / app ---
+    "plotly>=5.22",
+    "streamlit>=1.36",
 ]
 
 [project.optional-dependencies]
-# Instala con: uv sync --extra ml
+# Solo para entrenamiento/experimentación (no necesario en el dashboard desplegado).
 ml = [
-    "scikit-learn>=1.5",
-    "xgboost>=2.1",
-    "statsmodels>=0.14",   # regresión de Poisson (goles, tarjetas)
     "mlflow>=2.14",        # tracking de experimentos + registro de modelos
-    "numpy>=1.26",
-    "joblib>=1.4",         # serialización del modelo entrenado
-]
-# Instala con: uv sync --extra viz
-viz = [
-    "plotly>=5.22",
-    "streamlit>=1.36",
 ]
 dev = [
     "pytest>=8.2",
