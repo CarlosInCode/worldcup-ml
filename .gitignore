@@ -1,0 +1,28 @@
+# Secretos
+.env
+
+# Datos (pueden ser GB; no van a git). Bronze = archivos crudos; Silver/Gold = tablas
+# dentro de warehouse.duckdb (NO carpetas sueltas).
+data/bronze/*
+!data/bronze/.gitkeep
+*.duckdb
+*.duckdb.wal
+
+# ML
+mlruns/
+mlflow.db
+mlartifacts/
+*.pkl
+*.joblib
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.ruff_cache/
+.pytest_cache/
+
+# OS / IDE
+.DS_Store
+.vscode/
+.idea/

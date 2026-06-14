@@ -1,0 +1,19 @@
+{
+  "1x2": {
+    "score": 0.9011,
+    "metrics": {
+      "n_train": 8137,
+      "n_test": 2035,
+      "accuracy": 0.5828,
+      "baseline_accuracy_siempre_local": 0.4929,
+      "log_loss": 0.9011,
+      "cv_log_loss_tuning": 0.9425,
+      "best_params": {
+        "max_depth": 3,
+        "learning_rate": 0.05,
+        "n_estimators": 300
+      },
+      "calibrado": true
+    }
+  }
+}
