@@ -23,7 +23,10 @@ dependencies = [
     # En base (no en extras) para que el hosting que instala desde pyproject (Streamlit
     # Cloud) tenga todo lo que el dashboard necesita en runtime.
     "scikit-learn>=1.5",
-    "xgboost>=2.1",
+    # CPU-only en Linux (deploy): evita ~300MB de CUDA (nvidia-nccl) que agotan la RAM
+    # del tier gratis. En Mac/Windows se usa el xgboost normal.
+    "xgboost-cpu>=2.1; sys_platform == 'linux'",
+    "xgboost>=2.1; sys_platform != 'linux'",
     "statsmodels>=0.14",   # regresión de Poisson (goles, tarjetas, córners)
     "numpy>=1.26",
     "joblib>=1.4",         # serialización de modelos
